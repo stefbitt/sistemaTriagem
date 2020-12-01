@@ -16,7 +16,7 @@ public class TriagemApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TriagemApplication.class, args);
 	}
-//alura ahuahuauagh
+
 	@Bean
 	CommandLineRunner init(MedicoRep repository) {
 		return args -> {
