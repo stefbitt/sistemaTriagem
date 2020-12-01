@@ -20,8 +20,8 @@ public class Medico {
 		return crm;
 	}
 
-	public void setCrm(Long crm) {
-		this.crm = crm;
+	public void setCrm(Long string) {
+		this.crm = string;
 	}
 
 	public String getNome() {
