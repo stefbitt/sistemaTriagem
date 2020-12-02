@@ -3,6 +3,7 @@ package br.com.triagemsystem.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +48,7 @@ public class MedicoController {
 	public Medico create(@RequestBody Medico medico) {
 		return repository.save(medico);
 	}
+	
 
 	@PutMapping(value = "/{medicoId}")
 	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid, @RequestBody Medico medico) {
@@ -58,6 +60,15 @@ public class MedicoController {
 			Medico updated = repository.save(record);
 			return ResponseEntity.ok().body(updated);
 		}).orElse(ResponseEntity.notFound().build());
+	}
+	
+	@DeleteMapping(path ={"/{id}"})
+	public ResponseEntity <?> delete(@PathVariable long medicoId) {
+	   return repository.findById(medicoId)
+	           .map(record -> {
+	               repository.deleteById(medicoId);
+	               return ResponseEntity.ok().build();
+	           }).orElse(ResponseEntity.notFound().build());
 	}
 
 }
