@@ -48,7 +48,6 @@ public class MedicoController {
 	public Medico create(@RequestBody Medico medico) {
 		return repository.save(medico);
 	}
-	
 
 	@PutMapping(value = "/{medicoId}")
 	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid, @RequestBody Medico medico) {
@@ -61,14 +60,13 @@ public class MedicoController {
 			return ResponseEntity.ok().body(updated);
 		}).orElse(ResponseEntity.notFound().build());
 	}
-	
-	@DeleteMapping(path ={"/{id}"})
-	public ResponseEntity <?> delete(@PathVariable long medicoId) {
-	   return repository.findById(medicoId)
-	           .map(record -> {
-	               repository.deleteById(medicoId);
-	               return ResponseEntity.ok().build();
-	           }).orElse(ResponseEntity.notFound().build());
+
+	@DeleteMapping(path = { "/{medicoId}" })
+	public ResponseEntity<?> delete(@PathVariable long medicoId) {
+		return repository.findById(medicoId).map(record -> {
+			repository.deleteById(medicoId);
+			return ResponseEntity.ok().build();
+		}).orElse(ResponseEntity.notFound().build());
 	}
 
 }
