@@ -2,6 +2,7 @@ package br.com.triagemsystem.controller;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,8 +46,14 @@ public class MedicoController {
 	}
 
 	@PostMapping
-	public Medico create(@RequestBody Medico medico) {
-		return repository.save(medico);
+	public Medico create(@RequestBody Medico medico) throws Exception {
+		Medico medicoSalvo = null;
+		try {
+			medicoSalvo = repository.save(medico);
+		} catch (DataIntegrityViolationException e) {
+			throw new Exception("Error sistemico");
+		}
+		return medicoSalvo;
 	}
 
 	@PutMapping(value = "/{medicoId}")
@@ -62,7 +69,7 @@ public class MedicoController {
 	}
 
 	@DeleteMapping(path = { "/{medicoId}" })
-	public ResponseEntity<?> delete(@PathVariable long medicoId) {
+	public ResponseEntity<Object> delete(@PathVariable long medicoId) {
 		return repository.findById(medicoId).map(record -> {
 			repository.deleteById(medicoId);
 			return ResponseEntity.ok().build();
