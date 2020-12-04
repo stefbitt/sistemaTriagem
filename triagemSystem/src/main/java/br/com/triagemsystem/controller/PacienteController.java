@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.triagemsystem.model.Paciente;
 import br.com.triagemsystem.repository.PacienteRep;
 
+//@Autowired e @valid
 @RestController
 @RequestMapping({ "/pacientes" })
 public class PacienteController {

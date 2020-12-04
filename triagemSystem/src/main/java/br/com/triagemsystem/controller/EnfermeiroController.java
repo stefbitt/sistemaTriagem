@@ -2,7 +2,9 @@ package br.com.triagemsystem.controller;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,8 +47,16 @@ public class EnfermeiroController {
 	}
 
 	@PostMapping
-	public Enfermeiro create(@RequestBody Enfermeiro enfermeiro) {
-		return repository.save(enfermeiro);
+	public Enfermeiro create(@RequestBody Enfermeiro enfermeiro) throws Exception {
+		Enfermeiro enfermeiroSalvo = null;
+		try {
+			enfermeiroSalvo = repository.save(enfermeiro);
+		} catch (DataIntegrityViolationException e) {
+			throw new Exception("Error sistemico");
+		} catch(HttpMessageNotReadableException e){
+			throw new Exception("Error 404");
+		}
+		return enfermeiroSalvo;
 	}
 	
 
