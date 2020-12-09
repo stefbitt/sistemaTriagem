@@ -2,6 +2,8 @@ package br.com.triagemsystem.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,13 +42,13 @@ public class MedicoController {
 	}
 
 	@GetMapping(path = { "/{medicoId}" })
-	public ResponseEntity<Medico> findById(@PathVariable long medicoId) {
+	public ResponseEntity<Medico> findById(@PathVariable @Valid long medicoId) {
 		return repository.findById(medicoId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@PostMapping
-	public Medico create(@RequestBody Medico medico) throws Exception {
+	public Medico create(@RequestBody @Valid Medico medico) throws Exception {
 		Medico medicoSalvo = null;
 		try {
 			medicoSalvo = repository.save(medico);
@@ -57,7 +59,7 @@ public class MedicoController {
 	}
 
 	@PutMapping(value = "/{medicoId}")
-	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid, @RequestBody Medico medico) {
+	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid, @RequestBody @Valid Medico medico) {
 		return repository.findById(medicoid).map(record -> {
 			record.setNome(medico.getNome());
 			record.setEmail(medico.getEmail());
@@ -69,7 +71,7 @@ public class MedicoController {
 	}
 
 	@DeleteMapping(path = { "/{medicoId}" })
-	public ResponseEntity<Object> delete(@PathVariable long medicoId) {
+	public ResponseEntity<Object> delete(@PathVariable @Valid long medicoId) {
 		return repository.findById(medicoId).map(record -> {
 			repository.deleteById(medicoId);
 			return ResponseEntity.ok().build();

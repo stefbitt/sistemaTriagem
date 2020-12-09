@@ -2,6 +2,8 @@ package br.com.triagemsystem.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +33,7 @@ public class PacienteController {
 		return repository;
 	}
 
-	public void setRepository(PacienteRep repository) {
+	public void setRepository(PacienteRep  repository) {
 		this.repository = repository;
 	}
 
@@ -41,13 +43,13 @@ public class PacienteController {
 	}
 
 	@GetMapping(path = { "/{pacienteId}" })
-	public ResponseEntity<Paciente> findById(@PathVariable long medicoId) {
+	public ResponseEntity<Paciente> findById(@PathVariable @Valid long medicoId) {
 		return repository.findById(medicoId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@PostMapping
-	public Paciente create(@RequestBody Paciente paciente) throws Exception {
+	public Paciente create(@RequestBody @Valid Paciente paciente) throws Exception {
 		Paciente pacienteSalvo = null;
 		try {
 			pacienteSalvo = repository.save(paciente);
@@ -58,7 +60,7 @@ public class PacienteController {
 	}
 
 	@PutMapping(value = "/{pacienteId}")
-	public ResponseEntity<Paciente> update(@PathVariable("pacienteId") long pacienteid, @RequestBody Paciente paciente) {
+	public ResponseEntity<Paciente> update(@PathVariable("pacienteId") long pacienteid, @RequestBody @Valid Paciente paciente) {
 		return repository.findById(pacienteid).map(record -> {
 			record.setNome(paciente.getNome());
 			record.setEmail(paciente.getEmail());
@@ -70,7 +72,7 @@ public class PacienteController {
 	}
 
 	@DeleteMapping(path = { "/{pacienteId}" })
-	public ResponseEntity<Object> delete(@PathVariable long pacienteId) {
+	public ResponseEntity<Object> delete(@PathVariable @Valid long pacienteId) {
 		return repository.findById(pacienteId).map(record -> {
 			repository.deleteById(pacienteId);
 			return ResponseEntity.ok().build();

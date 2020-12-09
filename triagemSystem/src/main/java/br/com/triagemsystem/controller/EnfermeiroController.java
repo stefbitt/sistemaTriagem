@@ -1,8 +1,13 @@
 package br.com.triagemsystem.controller;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.triagemsystem.model.Enfermeiro;
@@ -41,13 +47,23 @@ public class EnfermeiroController {
 	}
 
 	@GetMapping(path = { "/{enfermeiroId}" })
-	public ResponseEntity<Enfermeiro> findById(@PathVariable long enfermeiroId) {
+	public ResponseEntity<Enfermeiro> findById(@PathVariable @Valid long enfermeiroId) {
+		
 		return repository.findById(enfermeiroId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
+	
+//	@GetMapping(path = { "/{enfermeiroId}" })
+//	public Page<Enfermeiro> findById(@PathVariable @Valid long enfermeiroId, @RequestParam String ordenacao) {
+//		
+//		Pageable paginacao = PageRequest.of(enfermeiroId, Direction.ASC, ordenacao);
+//		
+//		return repository.findById(enfermeiroId).map(record -> Page.ok().body(record,paginacao))
+//				.orElse(Page.notFound().build());
+//	}
 
 	@PostMapping
-	public Enfermeiro create(@RequestBody Enfermeiro enfermeiro) throws Exception {
+	public Enfermeiro create(@RequestBody @Valid Enfermeiro enfermeiro) throws Exception {
 		Enfermeiro enfermeiroSalvo = null;
 		try {
 			enfermeiroSalvo = repository.save(enfermeiro);
@@ -61,7 +77,7 @@ public class EnfermeiroController {
 	
 
 	@PutMapping(value = "/{enfermeiroId}")
-	public ResponseEntity<Enfermeiro> update(@PathVariable("enfermeiroId") long enfermeiroid, @RequestBody Enfermeiro enfermeiro) {
+	public ResponseEntity<Enfermeiro> update(@PathVariable("enfermeiroId") long enfermeiroid, @RequestBody @Valid Enfermeiro enfermeiro) {
 		return repository.findById(enfermeiroid).map(record -> {
 			record.setNome(enfermeiro.getNome());
 			record.setEmail(enfermeiro.getEmail());
@@ -73,7 +89,7 @@ public class EnfermeiroController {
 	}
 	
 	@DeleteMapping(path ={"/{enfermeiroId}"})
-	public ResponseEntity <?> delete(@PathVariable long enfermeiroId) {
+	public ResponseEntity <?> delete(@PathVariable @Valid long enfermeiroId) {
 	   return repository.findById(enfermeiroId)
 	           .map(record -> {
 	               repository.deleteById(enfermeiroId);
