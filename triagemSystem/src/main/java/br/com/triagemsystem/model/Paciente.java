@@ -9,6 +9,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.br.CPF;
 @Entity
 @Table(name = "t_paciente")
 public class Paciente {
@@ -18,6 +20,7 @@ public class Paciente {
 	@Column(name = "pacienteID")
 	private Long pacienteId;
 	
+	@CPF
 	@NotNull(message = "CPF não pode ser nula")
 	@NotBlank(message = "CPF não pode está em branco")
 	private Long cpf;

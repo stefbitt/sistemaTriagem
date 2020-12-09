@@ -1,13 +1,9 @@
 package br.com.triagemsystem.controller;
 
-import java.awt.print.Pageable;
-import java.util.List;
-
 import javax.validation.Valid;
-
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,8 +38,10 @@ public class EnfermeiroController {
 	}
 
 	@GetMapping
-	public List<Enfermeiro> findAll() {
-		return repository.findAll();
+	public Page<Enfermeiro> findAll(@RequestParam String nome,
+			@RequestParam(required = false, defaultValue = "0") int pagina,
+			@RequestParam(required = false, defaultValue = "10") int quantidade) {
+		return repository.findAll(PageRequest.of(pagina, quantidade));
 	}
 
 	@GetMapping(path = { "/{enfermeiroId}" })
@@ -52,15 +50,6 @@ public class EnfermeiroController {
 		return repository.findById(enfermeiroId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
-	
-//	@GetMapping(path = { "/{enfermeiroId}" })
-//	public Page<Enfermeiro> findById(@PathVariable @Valid long enfermeiroId, @RequestParam String ordenacao) {
-//		
-//		Pageable paginacao = PageRequest.of(enfermeiroId, Direction.ASC, ordenacao);
-//		
-//		return repository.findById(enfermeiroId).map(record -> Page.ok().body(record,paginacao))
-//				.orElse(Page.notFound().build());
-//	}
 
 	@PostMapping
 	public Enfermeiro create(@RequestBody @Valid Enfermeiro enfermeiro) throws Exception {
@@ -88,6 +77,11 @@ public class EnfermeiroController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 	
+	/**
+	 * Deleta enfermeiro cadastrado.
+	 * @param enfermeiroId id do enfeimeiro a ser excluido
+	 * @return ResponseEntity
+	 */
 	@DeleteMapping(path ={"/{enfermeiroId}"})
 	public ResponseEntity <?> delete(@PathVariable @Valid long enfermeiroId) {
 	   return repository.findById(enfermeiroId)
