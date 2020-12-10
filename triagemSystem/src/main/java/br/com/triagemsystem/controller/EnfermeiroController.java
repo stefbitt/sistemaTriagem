@@ -1,9 +1,12 @@
 package br.com.triagemsystem.controller;
 
 import javax.validation.Valid;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,13 +43,16 @@ public class EnfermeiroController {
 	@GetMapping
 	public Page<Enfermeiro> findAll(@RequestParam String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
-			@RequestParam(required = false, defaultValue = "10") int quantidade) {
-		return repository.findAll(PageRequest.of(pagina, quantidade));
+			@RequestParam(required = false, defaultValue = "10") int quantidade,
+			@RequestParam(required = false, defaultValue = "") String campoOrdenado,
+			@RequestParam(required = false, defaultValue = "") String directionType) {
+		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
+		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
 	}
 
 	@GetMapping(path = { "/{enfermeiroId}" })
 	public ResponseEntity<Enfermeiro> findById(@PathVariable @Valid long enfermeiroId) {
-		
+
 		return repository.findById(enfermeiroId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
@@ -58,37 +64,37 @@ public class EnfermeiroController {
 			enfermeiroSalvo = repository.save(enfermeiro);
 		} catch (DataIntegrityViolationException e) {
 			throw new Exception("Error sistemico");
-		} catch(HttpMessageNotReadableException e){
+		} catch (HttpMessageNotReadableException e) {
 			throw new Exception("Error 404");
 		}
 		return enfermeiroSalvo;
 	}
-	
 
 	@PutMapping(value = "/{enfermeiroId}")
-	public ResponseEntity<Enfermeiro> update(@PathVariable("enfermeiroId") long enfermeiroid, @RequestBody @Valid Enfermeiro enfermeiro) {
+	public ResponseEntity<Enfermeiro> update(@PathVariable("enfermeiroId") long enfermeiroid,
+			@RequestBody @Valid Enfermeiro enfermeiro) {
 		return repository.findById(enfermeiroid).map(record -> {
 			record.setNome(enfermeiro.getNome());
 			record.setEmail(enfermeiro.getEmail());
 			record.setMatricula(enfermeiro.getMatricula());
 			record.setSenha(enfermeiro.getSenha());
-		Enfermeiro updated = repository.save(record);
+			Enfermeiro updated = repository.save(record);
 			return ResponseEntity.ok().body(updated);
 		}).orElse(ResponseEntity.notFound().build());
 	}
-	
+
 	/**
 	 * Deleta enfermeiro cadastrado.
+	 * 
 	 * @param enfermeiroId id do enfeimeiro a ser excluido
 	 * @return ResponseEntity
 	 */
-	@DeleteMapping(path ={"/{enfermeiroId}"})
-	public ResponseEntity <?> delete(@PathVariable @Valid long enfermeiroId) {
-	   return repository.findById(enfermeiroId)
-	           .map(record -> {
-	               repository.deleteById(enfermeiroId);
-	               return ResponseEntity.ok().build();
-	           }).orElse(ResponseEntity.notFound().build());
+	@DeleteMapping(path = { "/{enfermeiroId}" })
+	public ResponseEntity<?> delete(@PathVariable @Valid long enfermeiroId) {
+		return repository.findById(enfermeiroId).map(record -> {
+			repository.deleteById(enfermeiroId);
+			return ResponseEntity.ok().build();
+		}).orElse(ResponseEntity.notFound().build());
 	}
 
 }

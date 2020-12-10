@@ -1,10 +1,12 @@
 package br.com.triagemsystem.controller;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.triagemsystem.model.Paciente;
@@ -33,13 +36,18 @@ public class PacienteController {
 		return repository;
 	}
 
-	public void setRepository(PacienteRep  repository) {
+	public void setRepository(PacienteRep repository) {
 		this.repository = repository;
 	}
 
 	@GetMapping
-	public List<Paciente> findAll() {
-		return repository.findAll();
+	public Page<Paciente> findAll(@RequestParam String nome,
+			@RequestParam(required = false, defaultValue = "0") int pagina,
+			@RequestParam(required = false, defaultValue = "10") int quantidade,
+			@RequestParam(required = false, defaultValue = "") String campoOrdenado,
+			@RequestParam(required = false, defaultValue = "") String directionType) {
+		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
+		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
 	}
 
 	@GetMapping(path = { "/{pacienteId}" })
@@ -60,7 +68,8 @@ public class PacienteController {
 	}
 
 	@PutMapping(value = "/{pacienteId}")
-	public ResponseEntity<Paciente> update(@PathVariable("pacienteId") long pacienteid, @RequestBody @Valid Paciente paciente) {
+	public ResponseEntity<Paciente> update(@PathVariable("pacienteId") long pacienteid,
+			@RequestBody @Valid Paciente paciente) {
 		return repository.findById(pacienteid).map(record -> {
 			record.setNome(paciente.getNome());
 			record.setEmail(paciente.getEmail());
