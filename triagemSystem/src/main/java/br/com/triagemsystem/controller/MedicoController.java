@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.triagemsystem.model.Medico;
+import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.MedicoRep;
+import br.com.triagemsystem.request.MedicoRequest;
 
 @RestController
 @RequestMapping({ "/medicos" })
@@ -40,10 +42,10 @@ public class MedicoController {
 	}
 
 	@GetMapping
-	public Page<Medico> findAll(@RequestParam String nome,
+	public Page<Medico> findAll(@RequestParam(required = false) String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
 			@RequestParam(required = false, defaultValue = "10") int quantidade,
-			@RequestParam(required = false, defaultValue = "") String campoOrdenado,
+			@RequestParam(required = false, defaultValue = "user.nome") String campoOrdenado,
 			@RequestParam(required = false, defaultValue = "") String directionType) {
 		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
 		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
@@ -56,25 +58,36 @@ public class MedicoController {
 	}
 
 	@PostMapping
-	public Medico create(@RequestBody @Valid Medico medico) throws Exception {
-		Medico medicoSalvo = null;
+	public Medico create(@RequestBody @Valid MedicoRequest medicoRequest) throws Exception {
+		Medico medico = new Medico();
+		medico.setCrm(medicoRequest.getCrm());
+
+		User user = new User();
+		user.setNome(medicoRequest.getNome());
+		user.setEmail(medicoRequest.getEmail());
+		user.setSenha(medicoRequest.getSenha());
+		medico.setUser(user);
+
 		try {
-			medicoSalvo = repository.save(medico);
+			medico = repository.save(medico);
 		} catch (DataIntegrityViolationException e) {
 			throw new Exception("Error sistemico");
 		}
-		return medicoSalvo;
+		return medico;
 	}
 
 	@PutMapping(value = "/{medicoId}")
-	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid, @RequestBody @Valid Medico medico) {
+	public ResponseEntity<Medico> update(@PathVariable("medicoId") long medicoid,
+			@RequestBody @Valid MedicoRequest medicoRequest) {
 		return repository.findById(medicoid).map(record -> {
-			record.setNome(medico.getNome());
-			record.setEmail(medico.getEmail());
-			record.setCrm(medico.getCrm());
-			record.setSenha(medico.getSenha());
-			Medico updated = repository.save(record);
-			return ResponseEntity.ok().body(updated);
+			User user = record.getUser();
+			user.setNome(medicoRequest.getNome());
+			user.setEmail(medicoRequest.getEmail());
+
+			record.setCrm(medicoRequest.getCrm());
+			record.setUser(user);
+
+			return ResponseEntity.ok().body(repository.save(record));
 		}).orElse(ResponseEntity.notFound().build());
 	}
 

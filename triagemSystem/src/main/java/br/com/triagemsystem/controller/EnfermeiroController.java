@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.triagemsystem.model.Enfermeiro;
+import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.EnfermeiroRep;
+import br.com.triagemsystem.request.EnfermeiroRequest;
 
 @RestController
 @RequestMapping({ "/enfermeiros" })
@@ -41,10 +43,10 @@ public class EnfermeiroController {
 	}
 
 	@GetMapping
-	public Page<Enfermeiro> findAll(@RequestParam String nome,
+	public Page<Enfermeiro> findAll(@RequestParam(required = false) String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
 			@RequestParam(required = false, defaultValue = "10") int quantidade,
-			@RequestParam(required = false, defaultValue = "") String campoOrdenado,
+			@RequestParam(required = false, defaultValue = "user.nome") String campoOrdenado,
 			@RequestParam(required = false, defaultValue = "") String directionType) {
 		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
 		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
@@ -58,35 +60,46 @@ public class EnfermeiroController {
 	}
 
 	@PostMapping
-	public Enfermeiro create(@RequestBody @Valid Enfermeiro enfermeiro) throws Exception {
-		Enfermeiro enfermeiroSalvo = null;
+	public Enfermeiro create(@RequestBody @Valid EnfermeiroRequest enfermeiroRequest) throws Exception {
+		Enfermeiro enfermeiro = new Enfermeiro();
+		enfermeiro.setMatricula(enfermeiroRequest.getMatricula());
+
+		User user = new User();
+		user.setNome(enfermeiroRequest.getNome());
+		user.setEmail(enfermeiroRequest.getEmail());
+		user.setSenha(enfermeiroRequest.getSenha());
+
+		enfermeiro.setUser(user);
+
 		try {
-			enfermeiroSalvo = repository.save(enfermeiro);
+			enfermeiro = repository.save(enfermeiro);
 		} catch (DataIntegrityViolationException e) {
 			throw new Exception("Error sistemico");
 		} catch (HttpMessageNotReadableException e) {
 			throw new Exception("Error 404");
 		}
-		return enfermeiroSalvo;
+		return enfermeiro;
 	}
 
 	@PutMapping(value = "/{enfermeiroId}")
 	public ResponseEntity<Enfermeiro> update(@PathVariable("enfermeiroId") long enfermeiroid,
-			@RequestBody @Valid Enfermeiro enfermeiro) {
+			@RequestBody @Valid EnfermeiroRequest enfermeiroRequest) {
 		return repository.findById(enfermeiroid).map(record -> {
-			record.setNome(enfermeiro.getNome());
-			record.setEmail(enfermeiro.getEmail());
-			record.setMatricula(enfermeiro.getMatricula());
-			record.setSenha(enfermeiro.getSenha());
-			Enfermeiro updated = repository.save(record);
-			return ResponseEntity.ok().body(updated);
+			User user = record.getUser();
+			user.setNome(enfermeiroRequest.getNome());
+			user.setEmail(enfermeiroRequest.getEmail());
+
+			record.setMatricula(enfermeiroRequest.getMatricula());
+			record.setUser(user);
+
+			return ResponseEntity.ok().body(repository.save(record));
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
 	/**
 	 * Deleta enfermeiro cadastrado.
 	 * 
-	 * @param enfermeiroId id do enfeimeiro a ser excluido
+	 * @param enfermeiroId id do enfeimeiro a será excluido
 	 * @return ResponseEntity
 	 */
 	@DeleteMapping(path = { "/{enfermeiroId}" })

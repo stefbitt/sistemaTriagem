@@ -2,12 +2,15 @@ package br.com.triagemsystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class TriagemApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(TriagemApplication.class, args);
+	    System.out.println(new BCryptPasswordEncoder().encode("123456"));
+	  }
 	}
 		
 		
@@ -24,4 +27,3 @@ public class TriagemApplication {
 //			}).map(v -> repository.save(v)).forEach(System.out::println);
 //		};
 //	}
-}

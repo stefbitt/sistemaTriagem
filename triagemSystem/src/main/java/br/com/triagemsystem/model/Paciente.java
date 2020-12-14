@@ -5,12 +5,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.br.CPF;
 @Entity
 @Table(name = "t_paciente")
 public class Paciente {
@@ -19,52 +17,36 @@ public class Paciente {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "pacienteID")
 	private Long pacienteId;
-	
-	@CPF
-	@NotNull(message = "CPF não pode ser nula")
-	@NotBlank(message = "CPF não pode está em branco")
+
 	private Long cpf;
 	
-	@NotNull(message = "Nome não pode ser nula")
-	@NotBlank(message = "Nome não pode está em branco")
-	private String nome;
-	
-	@NotNull(message = "Email não pode ser nulo")
-	@Email(message = "Email não é válido")
-	private String email;
-	
-	@NotNull(message = "Senha não pode ser nula")
-	@NotBlank(message = "Senha não pode está em branco")
-	private String senha;
-	
+	@OneToOne
+	@JoinColumn(name = "userID")
+	private User user;
+
 	public Long getPacienteId() {
 		return pacienteId;
 	}
+
 	public void setPacienteId(Long pacienteId) {
 		this.pacienteId = pacienteId;
 	}
+
 	public Long getCpf() {
 		return cpf;
 	}
+
 	public void setCpf(Long cpf) {
 		this.cpf = cpf;
 	}
-	public String getNome() {
-		return nome;
+
+	public User getUser() {
+		return user;
 	}
-	public void setNome(String nome) {
-		this.nome = nome;
+
+	public void setUser(User user) {
+		this.user = user;
 	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public String getSenha() {
-		return senha;
-	}
-	public void setSenha(String senha) {
-		this.senha = senha;
-	}
-	}
+	
+	
+}

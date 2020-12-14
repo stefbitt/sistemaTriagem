@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.triagemsystem.model.Paciente;
+import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.PacienteRep;
+import br.com.triagemsystem.request.PacienteRequest;
 
 //@Autowired e @valid
 @RestController
@@ -41,42 +43,53 @@ public class PacienteController {
 	}
 
 	@GetMapping
-	public Page<Paciente> findAll(@RequestParam String nome,
+	public Page<Paciente> findAll(@RequestParam(required = false) String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
 			@RequestParam(required = false, defaultValue = "10") int quantidade,
-			@RequestParam(required = false, defaultValue = "") String campoOrdenado,
+			@RequestParam(required = false, defaultValue = "user.nome") String campoOrdenado,
 			@RequestParam(required = false, defaultValue = "") String directionType) {
 		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
 		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
 	}
 
 	@GetMapping(path = { "/{pacienteId}" })
-	public ResponseEntity<Paciente> findById(@PathVariable @Valid long medicoId) {
-		return repository.findById(medicoId).map(record -> ResponseEntity.ok().body(record))
+	public ResponseEntity<Paciente> findById(@PathVariable @Valid long pacienteId) {
+		return repository.findById(pacienteId).map(record -> ResponseEntity.ok().body(record))
 				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@PostMapping
-	public Paciente create(@RequestBody @Valid Paciente paciente) throws Exception {
-		Paciente pacienteSalvo = null;
+	public Paciente create(@RequestBody @Valid PacienteRequest pacienteRequest) throws Exception {
+		Paciente paciente = new Paciente();
+		paciente.setCpf(pacienteRequest.getCpf());
+		
+		User user = new User();
+		user.setNome(pacienteRequest.getNome());
+		user.setEmail(pacienteRequest.getEmail());
+		user.setSenha(pacienteRequest.getSenha());
+		
+		paciente.setUser(user);
+		
 		try {
-			pacienteSalvo = repository.save(paciente);
+			paciente = repository.save(paciente);
 		} catch (DataIntegrityViolationException e) {
 			throw new Exception("Error sistemico");
 		}
-		return pacienteSalvo;
+		return paciente;
 	}
 
 	@PutMapping(value = "/{pacienteId}")
 	public ResponseEntity<Paciente> update(@PathVariable("pacienteId") long pacienteid,
-			@RequestBody @Valid Paciente paciente) {
+			@RequestBody @Valid PacienteRequest pacienteRequest) {
 		return repository.findById(pacienteid).map(record -> {
-			record.setNome(paciente.getNome());
-			record.setEmail(paciente.getEmail());
-			record.setCpf(paciente.getCpf());
-			record.setSenha(paciente.getSenha());
-			Paciente updated = repository.save(record);
-			return ResponseEntity.ok().body(updated);
+			User user = record.getUser();
+			user.setNome(pacienteRequest.getNome());
+			user.setEmail(pacienteRequest.getEmail());
+			
+			record.setCpf(pacienteRequest.getCpf());
+			record.setUser(user);
+			
+			return ResponseEntity.ok().body(repository.save(record));
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
