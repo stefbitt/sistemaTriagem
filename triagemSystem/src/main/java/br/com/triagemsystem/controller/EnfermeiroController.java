@@ -23,6 +23,8 @@ import br.com.triagemsystem.model.Enfermeiro;
 import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.EnfermeiroRep;
 import br.com.triagemsystem.request.EnfermeiroRequest;
+import br.com.triagemsystem.response.EnfermeiroDto;
+import br.com.triagemsystem.response.MedicoDto;
 
 @RestController
 @RequestMapping({ "/enfermeiros" })
@@ -43,13 +45,13 @@ public class EnfermeiroController {
 	}
 
 	@GetMapping
-	public Page<Enfermeiro> findAll(@RequestParam(required = false) String nome,
+	public Page<EnfermeiroDto> findAll(@RequestParam(required = false) String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
 			@RequestParam(required = false, defaultValue = "10") int quantidade,
 			@RequestParam(required = false, defaultValue = "user.nome") String campoOrdenado,
 			@RequestParam(required = false, defaultValue = "") String directionType) {
 		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
-		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
+		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado))).map(EnfermeiroDto::new);
 	}
 
 	@GetMapping(path = { "/{enfermeiroId}" })
