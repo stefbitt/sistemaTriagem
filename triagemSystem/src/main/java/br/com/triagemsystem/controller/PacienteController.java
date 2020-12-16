@@ -22,6 +22,7 @@ import br.com.triagemsystem.model.Paciente;
 import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.PacienteRep;
 import br.com.triagemsystem.request.PacienteRequest;
+import br.com.triagemsystem.response.PacienteDto;
 
 //@Autowired e @valid
 @RestController
@@ -43,13 +44,13 @@ public class PacienteController {
 	}
 
 	@GetMapping
-	public Page<Paciente> findAll(@RequestParam(required = false) String nome,
+	public Page<PacienteDto> findAll(@RequestParam(required = false) String nome,
 			@RequestParam(required = false, defaultValue = "0") int pagina,
 			@RequestParam(required = false, defaultValue = "10") int quantidade,
 			@RequestParam(required = false, defaultValue = "user.nome") String campoOrdenado,
 			@RequestParam(required = false, defaultValue = "") String directionType) {
 		Direction direction = "desc".equalsIgnoreCase(directionType) ? Direction.DESC : Direction.ASC;
-		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado)));
+		return repository.findAll(PageRequest.of(pagina, quantidade, Sort.by(direction, campoOrdenado))).map(PacienteDto::new);
 	}
 
 	@GetMapping(path = { "/{pacienteId}" })

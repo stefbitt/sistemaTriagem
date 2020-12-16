@@ -24,7 +24,6 @@ import br.com.triagemsystem.model.User;
 import br.com.triagemsystem.repository.EnfermeiroRep;
 import br.com.triagemsystem.request.EnfermeiroRequest;
 import br.com.triagemsystem.response.EnfermeiroDto;
-import br.com.triagemsystem.response.MedicoDto;
 
 @RestController
 @RequestMapping({ "/enfermeiros" })
