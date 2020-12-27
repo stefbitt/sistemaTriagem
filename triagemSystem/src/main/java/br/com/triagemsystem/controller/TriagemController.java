@@ -7,42 +7,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import br.com.triagemsystem.enumerate.TipoPrioridade;
-import br.com.triagemsystem.model.Paciente;
-import br.com.triagemsystem.repository.PacienteRep;
+import org.springframework.web.bind.annotation.RequestMapping;
 import br.com.triagemsystem.request.CalcularPrioridadeRequest;
-import br.com.triagemsystem.response.CalculoResponse;
+import br.com.triagemsystem.response.AtendimentoResponse;
+import br.com.triagemsystem.service.AtendimentoService;
 import javassist.NotFoundException;
 
 @Controller
+@RequestMapping("/triagem")
 public class TriagemController {
 	
 	@Autowired
-	private PacienteRep pacienteRep;
+	private AtendimentoService atendimentoService;
 
-	@PostMapping("/calcularPrioridade")
-	public ResponseEntity<CalculoResponse> calcularPriodidade(@RequestBody @Valid CalcularPrioridadeRequest request) throws NotFoundException {
-
-		CalculoResponse response = new CalculoResponse();
-		TipoPrioridade prioridade = null;
-		
-		
-		Paciente paciente = pacienteRep.findById(request.getPacienteId())
-				.orElseThrow(() -> new NotFoundException("Paciente não encontrado"));
-
-		if (request.getPontuacao() >= 1 && request.getPontuacao() <= 10) {
-			prioridade = TipoPrioridade.VERDE;
-		} else if (request.getPontuacao() >= 11 && request.getPontuacao() <= 30) {
-			prioridade = TipoPrioridade.AMARELO;
-		} else {
-			prioridade = TipoPrioridade.VERMELHO;
-		}
-		
-		response.setPrioridade(prioridade);
-		response.setNomePaciente(paciente.getUser().getNome());
-
-		return ResponseEntity.ok(response);
+	@PostMapping("/initial")
+	public ResponseEntity<AtendimentoResponse> calcularPriodidade(@RequestBody @Valid CalcularPrioridadeRequest request) throws NotFoundException {
+		return ResponseEntity.ok(atendimentoService.save(request));
 	}
+	
+	@PostMapping("/inicarAtentimento")
+	public ResponseEntity<AtendimentoResponse> calcularPriodidade1() {
+		return null;
+	}
+	
+	@PostMapping("/finalizarAtentimento")
+	public ResponseEntity<AtendimentoResponse> calcularPriodidade2() {
+		return null;
+	}
+	
+	@PostMapping("/chamarProximo")
+	public ResponseEntity<AtendimentoResponse> calcularPriodidade3() {
+		return null;
+	}
+	
 
 }
