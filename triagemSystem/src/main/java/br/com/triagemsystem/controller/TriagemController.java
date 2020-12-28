@@ -5,10 +5,13 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import br.com.triagemsystem.request.CalcularPrioridadeRequest;
+import br.com.triagemsystem.request.InicializarAtendimentoRequest;
 import br.com.triagemsystem.response.AtendimentoResponse;
 import br.com.triagemsystem.service.AtendimentoService;
 import javassist.NotFoundException;
@@ -25,9 +28,11 @@ public class TriagemController {
 		return ResponseEntity.ok(atendimentoService.save(request));
 	}
 	
-	@PostMapping("/inicarAtentimento")
-	public ResponseEntity<AtendimentoResponse> calcularPriodidade1() {
-		return null;
+	@PostMapping("/inicarAtentimento/{atendimentoId}")
+	public ResponseEntity<Void> startAtedimento(@RequestBody @Valid InicializarAtendimentoRequest request,
+			@PathVariable Long atendimentoId) throws NotFoundException {
+		atendimentoService.inicializarAtendimento(atendimentoId, request);
+		return ResponseEntity.ok().build();
 	}
 	
 	@PostMapping("/finalizarAtentimento")

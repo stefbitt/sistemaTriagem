@@ -8,10 +8,13 @@ import org.springframework.stereotype.Service;
 import br.com.triagemsystem.enumerate.TipoAtendimento;
 import br.com.triagemsystem.enumerate.TipoPrioridade;
 import br.com.triagemsystem.model.Atendimento;
+import br.com.triagemsystem.model.Medico;
 import br.com.triagemsystem.model.Paciente;
 import br.com.triagemsystem.repository.AtendimentoRep;
+import br.com.triagemsystem.repository.MedicoRep;
 import br.com.triagemsystem.repository.PacienteRep;
 import br.com.triagemsystem.request.CalcularPrioridadeRequest;
+import br.com.triagemsystem.request.InicializarAtendimentoRequest;
 import br.com.triagemsystem.response.AtendimentoResponse;
 import br.com.triagemsystem.response.PacienteDto;
 import javassist.NotFoundException;
@@ -21,10 +24,12 @@ public class AtendimentoService {
 
 	@Autowired
 	private PacienteRep pacienteRep;
-	
+
 	@Autowired
 	private AtendimentoRep atendimentoRep;
 
+	@Autowired
+	private MedicoRep medicoRep;
 
 	public AtendimentoResponse save(CalcularPrioridadeRequest request) throws NotFoundException {
 		Atendimento atendimento = new Atendimento();
@@ -45,11 +50,11 @@ public class AtendimentoService {
 		atendimento.setPaciente(paciente);
 		atendimento.setHorarioChegada(LocalDateTime.now());
 		atendimento = atendimentoRep.save(atendimento);
-		
+
 		atendimentoResponse.setCod(atendimento.getAtendimentoId());
 		atendimentoResponse.setTipoPrioridade(prioridade);
 		atendimentoResponse.setPacienteDto(new PacienteDto(paciente));
-		
+
 		return atendimentoResponse;
 	}
 
@@ -65,4 +70,18 @@ public class AtendimentoService {
 		return prioridade;
 	}
 
+	public void inicializarAtendimento(Long atendimentoId, InicializarAtendimentoRequest inicializarAtendimento)
+			throws NotFoundException {
+		Atendimento atendimento = atendimentoRep.findById(atendimentoId)
+				.orElseThrow(() -> new NotFoundException("Atendimento não encontrado"));
+
+		Medico medico = medicoRep.findById(inicializarAtendimento.getMedicoId())
+				.orElseThrow(() -> new NotFoundException("Médico não encontrado"));
+
+		atendimento.setHorarioInicioAtendimento(LocalDateTime.now());
+		atendimento.setMedico(medico);
+
+		atendimentoRep.save(atendimento);
+
+	}
 }
